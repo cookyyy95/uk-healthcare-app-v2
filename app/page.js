@@ -1,4 +1,24 @@
+'use client'
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+
 export default function HomePage() {
+  const router = useRouter()
+  const [searchQuery, setSearchQuery] = useState('')
+  const [location, setLocation] = useState('')
+
+  const handleSearch = (e) => {
+    e.preventDefault()
+    const params = new URLSearchParams()
+    if (searchQuery) params.append('query', searchQuery)
+    if (location) params.append('location', location)
+    router.push(`/search?${params.toString()}`)
+  }
+
+  const handleServiceClick = (service) => {
+    router.push(`/search?service=${encodeURIComponent(service)}`)
+  }
+
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#f9fafb' }}>
       {/* Hero Section */}
@@ -17,11 +37,13 @@ export default function HomePage() {
           </p>
           
           {/* Search Form */}
-          <div style={{ maxWidth: '600px', margin: '0 auto' }}>
+          <form onSubmit={handleSearch} style={{ maxWidth: '600px', margin: '0 auto' }}>
             <div style={{ display: 'flex', gap: '1rem', flexDirection: 'column' }}>
               <input
                 type="text"
                 placeholder="Search for services (e.g., GP consultation, physiotherapy)"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 style={{
                   width: '100%',
                   padding: '0.75rem',
@@ -33,6 +55,8 @@ export default function HomePage() {
               <input
                 type="text"
                 placeholder="Enter your location"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
                 style={{
                   width: '100%',
                   padding: '0.75rem',
@@ -42,6 +66,7 @@ export default function HomePage() {
                 }}
               />
               <button
+                type="submit"
                 style={{
                   padding: '0.75rem 2rem',
                   backgroundColor: 'white',
@@ -56,7 +81,7 @@ export default function HomePage() {
                 Search
               </button>
             </div>
-          </div>
+          </form>
         </div>
       </section>
 
@@ -83,7 +108,9 @@ export default function HomePage() {
                 alignItems: 'center', 
                 justifyContent: 'center', 
                 margin: '0 auto 1rem',
-                fontSize: '2rem'
+                fontSize: '2rem',
+                fontWeight: 'bold',
+                color: '#0284c7'
               }}>
                 ⏰
               </div>
@@ -103,7 +130,9 @@ export default function HomePage() {
                 alignItems: 'center', 
                 justifyContent: 'center', 
                 margin: '0 auto 1rem',
-                fontSize: '2rem'
+                fontSize: '2rem',
+                fontWeight: 'bold',
+                color: '#0284c7'
               }}>
                 ⭐
               </div>
@@ -123,7 +152,9 @@ export default function HomePage() {
                 alignItems: 'center', 
                 justifyContent: 'center', 
                 margin: '0 auto 1rem',
-                fontSize: '2rem'
+                fontSize: '2rem',
+                fontWeight: 'bold',
+                color: '#0284c7'
               }}>
                 🔒
               </div>
@@ -150,27 +181,41 @@ export default function HomePage() {
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem' }}>
             {[
-              'GP Consultation',
-              'Physiotherapy',
-              'Mental Health',
-              'Dermatology',
-              'Dental Care',
-              'Optometry',
-              'Cardiology',
-              'Pediatrics'
+              { name: 'GP Consultation', icon: '👨‍⚕️' },
+              { name: 'Physiotherapy', icon: '��‍♂️' },
+              { name: 'Mental Health', icon: '🧠' },
+              { name: 'Dermatology', icon: '🩺' },
+              { name: 'Dental Care', icon: '🦷' },
+              { name: 'Optometry', icon: '👁️' },
+              { name: 'Cardiology', icon: '❤️' },
+              { name: 'Pediatrics', icon: '👶' }
             ].map((service) => (
-              <div key={service} style={{
-                backgroundColor: 'white',
-                borderRadius: '0.5rem',
-                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-                border: '1px solid #e5e7eb',
-                padding: '1.5rem',
-                textAlign: 'left',
-                cursor: 'pointer'
-              }}>
-                <h3 style={{ fontWeight: '600', color: '#1f2937', marginBottom: '0.5rem' }}>{service}</h3>
+              <div 
+                key={service.name} 
+                onClick={() => handleServiceClick(service.name)}
+                style={{
+                  backgroundColor: 'white',
+                  borderRadius: '0.5rem',
+                  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+                  border: '1px solid #e5e7eb',
+                  padding: '1.5rem',
+                  textAlign: 'left',
+                  cursor: 'pointer',
+                  transition: 'transform 0.2s, box-shadow 0.2s'
+                }}
+                onMouseOver={(e) => {
+                  e.target.style.transform = 'translateY(-2px)'
+                  e.target.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)'
+                }}
+                onMouseOut={(e) => {
+                  e.target.style.transform = 'translateY(0)'
+                  e.target.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.1)'
+                }}
+              >
+                <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>{service.icon}</div>
+                <h3 style={{ fontWeight: '600', color: '#1f2937', marginBottom: '0.5rem' }}>{service.name}</h3>
                 <p style={{ fontSize: '0.875rem', color: '#6b7280' }}>
-                  Find qualified {service.toLowerCase()} providers
+                  Find qualified {service.name.toLowerCase()} providers
                 </p>
               </div>
             ))}
@@ -188,6 +233,7 @@ export default function HomePage() {
             Join thousands of patients who found faster, affordable care
           </p>
           <button
+            onClick={() => router.push('/search')}
             style={{
               padding: '0.75rem 2rem',
               backgroundColor: 'white',
@@ -196,8 +242,11 @@ export default function HomePage() {
               borderRadius: '0.5rem',
               border: 'none',
               cursor: 'pointer',
-              fontSize: '1rem'
+              fontSize: '1rem',
+              transition: 'background-color 0.2s'
             }}
+            onMouseOver={(e) => e.target.style.backgroundColor = '#f3f4f6'}
+            onMouseOut={(e) => e.target.style.backgroundColor = 'white'}
           >
             Start Searching Now
           </button>
