@@ -1,8 +1,8 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 
-export default function SearchPage() {
+function SearchContent() {
   const searchParams = useSearchParams()
   const [searchQuery, setSearchQuery] = useState('')
   const [location, setLocation] = useState('')
@@ -497,5 +497,24 @@ export default function SearchPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+function LoadingFallback() {
+  return (
+    <div style={{ minHeight: '100vh', backgroundColor: '#f9fafb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ textAlign: 'center' }}>
+        <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>🔍</div>
+        <p style={{ fontSize: '1.25rem', color: '#6b7280' }}>Loading search...</p>
+      </div>
+    </div>
+  )
+}
+
+export default function SearchPage() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <SearchContent />
+    </Suspense>
   )
 }
