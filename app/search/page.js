@@ -1,7 +1,9 @@
 'use client'
 import { useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 
 export default function SearchPage() {
+  const searchParams = useSearchParams()
   const [searchQuery, setSearchQuery] = useState('')
   const [location, setLocation] = useState('')
   const [providers, setProviders] = useState([])
@@ -85,11 +87,73 @@ export default function SearchPage() {
       description: 'Comprehensive mental health services with experienced professionals.',
       languages: ['English', 'German'],
       isVerified: true
+    },
+    {
+      id: 4,
+      practiceName: 'Manchester Health Centre',
+      firstName: 'Emma',
+      lastName: 'Wilson',
+      title: 'Dr',
+      providerType: 'GP',
+      phone: '0161 234 5678',
+      email: 'dr.wilson@manchesterhealth.com',
+      address: {
+        street: '789 Deansgate',
+        city: 'Manchester',
+        postcode: 'M3 2BW'
+      },
+      services: [
+        { name: 'GP Consultation', price: 75, duration: 30 },
+        { name: 'Health Check', price: 60, duration: 45 },
+        { name: 'Travel Vaccination', price: 55, duration: 20 }
+      ],
+      rating: { average: 4.7, count: 98 },
+      description: 'Modern GP practice in central Manchester with extended hours.',
+      languages: ['English'],
+      isVerified: true
+    },
+    {
+      id: 5,
+      practiceName: 'Birmingham Sports Clinic',
+      firstName: 'Michael',
+      lastName: 'Taylor',
+      title: 'Mr',
+      providerType: 'Private',
+      phone: '0121 345 6789',
+      email: 'sports@birminghamclinic.com',
+      address: {
+        street: '456 Broad Street',
+        city: 'Birmingham',
+        postcode: 'B1 2EA'
+      },
+      services: [
+        { name: 'Sports Injury Assessment', price: 95, duration: 60 },
+        { name: 'Physiotherapy Session', price: 65, duration: 45 },
+        { name: 'Rehabilitation Program', price: 85, duration: 60 }
+      ],
+      rating: { average: 4.5, count: 76 },
+      description: 'Specialized sports medicine and physiotherapy services.',
+      languages: ['English', 'Polish'],
+      isVerified: true
     }
   ]
 
-  const handleSearch = (e) => {
-    e.preventDefault()
+  // Load search parameters from URL on component mount
+  useEffect(() => {
+    const query = searchParams.get('query') || ''
+    const locationParam = searchParams.get('location') || ''
+    const service = searchParams.get('service') || ''
+    
+    setSearchQuery(query || service)
+    setLocation(locationParam)
+    
+    // Auto-search if parameters are provided
+    if (query || locationParam || service) {
+      performSearch(query || service, locationParam)
+    }
+  }, [searchParams])
+
+  const performSearch = (query, locationParam) => {
     setLoading(true)
     
     // Simulate search delay
@@ -97,20 +161,20 @@ export default function SearchPage() {
       let filteredProviders = [...sampleProviders]
       
       // Filter by search query
-      if (searchQuery) {
+      if (query) {
         filteredProviders = filteredProviders.filter(provider => 
-          provider.practiceName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          provider.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          provider.lastName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          provider.services.some(s => s.name.toLowerCase().includes(searchQuery.toLowerCase()))
+          provider.practiceName.toLowerCase().includes(query.toLowerCase()) ||
+          provider.firstName.toLowerCase().includes(query.toLowerCase()) ||
+          provider.lastName.toLowerCase().includes(query.toLowerCase()) ||
+          provider.services.some(s => s.name.toLowerCase().includes(query.toLowerCase()))
         )
       }
       
       // Filter by location
-      if (location) {
+      if (locationParam) {
         filteredProviders = filteredProviders.filter(provider => 
-          provider.address.city.toLowerCase().includes(location.toLowerCase()) ||
-          provider.address.postcode.toLowerCase().includes(location.toLowerCase())
+          provider.address.city.toLowerCase().includes(locationParam.toLowerCase()) ||
+          provider.address.postcode.toLowerCase().includes(locationParam.toLowerCase())
         )
       }
       
@@ -138,6 +202,11 @@ export default function SearchPage() {
       setProviders(filteredProviders)
       setLoading(false)
     }, 1000)
+  }
+
+  const handleSearch = (e) => {
+    e.preventDefault()
+    performSearch(searchQuery, location)
   }
 
   const formatPrice = (price) => {
@@ -407,7 +476,7 @@ export default function SearchPage() {
                     key={search}
                     onClick={() => {
                       setSearchQuery(search)
-                      handleSearch({ preventDefault: () => {} })
+                      performSearch(search, location)
                     }}
                     style={{
                       textAlign: 'left',
